@@ -10,9 +10,9 @@
  */
 $(function() {
     /* This is our first test suite - a test suite just contains
-    * a related set of tests. This suite is all about the RSS
-    * feeds definitions, the allFeeds variable in our application.
-    */
+     * a related set of tests. This suite is all about the RSS
+     * feeds definitions, the allFeeds variable in our application.
+     */
     describe('RSS Feeds', function() {
         /* This is our first test - it tests to make sure that the
          * allFeeds variable has been defined and that it is not
@@ -22,8 +22,8 @@ $(function() {
          * page?
          */
         it('are defined', function() {
-            expect(allFeeds).toBeDefined();
-            expect(allFeeds.length).not.toBe(0);
+            expect(allFeeds).toBeDefined(); //check if allFeeds defined
+            expect(allFeeds.length).not.toBe(0); //check if allFeeds non-empty
         });
 
 
@@ -31,29 +31,35 @@ $(function() {
          * in the allFeeds object and ensures it has a URL defined
          * and that the URL is not empty.
          */
-         it('non-empty, defined urls', function() {
-           for (var i in allFeeds){
-             expect(allFeeds[i].url).toBeDefined();
-             expect(allFeeds[i].url.length).not.toBe(0);
-           }
-         });
+        it('non-empty, defined urls', function() {
+            /* looping through the allFeeds array, checking if
+             * url of each feed is defined and non-empty
+             */
+            allFeeds.forEach(function(feed) {
+                expect(feed.url).toBeDefined();
+                expect(feed.url.length).not.toBe(0);
+            })
+        });
 
 
-        /* TODO: Write a test that loops through each feed
+        /* Write a test that loops through each feed
          * in the allFeeds object and ensures it has a name defined
          * and that the name is not empty.
          */
-         it('non-empty, defined names', function() {
-           for (var i in allFeeds){
-             expect(allFeeds[i].name).toBeDefined();
-             expect(allFeeds[i].name.length).not.toBe(0);
-           }
-         });
+        it('non-empty, defined names', function() {
+            /* looping through the allFeeds array, checking if
+             * name of each feed is defined and non-empty
+             */
+            allFeeds.forEach(function(feed) {
+                expect(feed.name).toBeDefined();
+                expect(feed.name.length).not.toBe(0);
+            })
+        });
     });
 
 
     /* Write a new test suite named "The menu" */
-    describe('The menu', function(){
+    describe('The menu', function() {
 
 
 
@@ -62,75 +68,83 @@ $(function() {
          * the CSS to determine how we're performing the
          * hiding/showing of the menu element.
          */
-         it('hidden by default menu', function(){
-           expect($('body').hasClass('menu-hidden')).toBe(true);
-         });
+        it('hidden by default menu', function() {
+            /*check if body has class .menu-hidden if so then it is hidden by
+              default
+            */
+            expect($('body').hasClass('menu-hidden')).toBeTruthy();
+        });
 
-         /* Write a test that ensures the menu changes
-          * visibility when the menu icon is clicked. This test
-          * should have two expectations: does the menu display when
-          * clicked and does it hide when clicked again.
-          */
-          it('change menu visibility on click', function() {
+        /* Write a test that ensures the menu changes
+         * visibility when the menu icon is clicked. This test
+         * should have two expectations: does the menu display when
+         * clicked and does it hide when clicked again.
+         */
+        it('change menu visibility on click', function() {
+            /*Check if body has a .menu-hidden after click on menu-icon-link,
+              if no, it means that menu has been displayed.
+            */
             $('a.menu-icon-link').click();
-            expect($('body').hasClass('menu-hidden')).toBe(false);
+            expect($('body').hasClass('menu-hidden')).toBeFalsy();
+            /* Check if body has a .menu-hidden class after another click,
+               if so, then menu has been hidden.
+            */
             $('a.menu-icon-link').click();
-            expect($('body').hasClass('menu-hidden')).toBe(true);
-          });
-      });
+            expect($('body').hasClass('menu-hidden')).toBeTruthy();
+        });
+    });
 
     /* Write a new test suite named "Initial Entries" */
-    describe('Initial Entries', function(){
+    describe('Initial Entries', function() {
         /* Write a test that ensures when the loadFeed
          * function is called and completes its work, there is at least
          * a single .entry element within the .feed container.
          * Remember, loadFeed() is asynchronous so this test will require
          * the use of Jasmine's beforeEach and asynchronous done() function.
          */
-         beforeEach(function(done) {
-           loadFeed(0, function(){
-             done();
-           });
-         });
 
-         it('at least one entry within the .feed container', function(done) {
-           expect($('.entry').length).not.toBe(0);
-           done();
-         });
-      });
+        //load first feed before test execution
+        beforeEach(function(done) {
+            loadFeed(0, done);
+        });
+
+        //check if class feed (container) has a child with class .entry
+        it('at least one entry within the .feed container', function() {
+            expect($('.feed .entry').length).not.toBe(0);
+        });
+    });
 
 
     /* Write a new test suite named "New Feed Selection" */
-    describe('New Feed Selection', function(){
+    describe('New Feed Selection', function() {
         /* Write a test that ensures when a new feed is loaded
          * by the loadFeed function that the content actually changes.
          * Remember, loadFeed() is asynchronous.
          */
 
-         var before, after; //variables to be compared
+        var before, after; //variables to be compared
 
+        beforeEach(function(done) {
+            //check if there are at least 2 entities to compare
+            expect(allFeeds).toBeDefined();
+            expect(allFeeds.length).toBeGreaterThan(1);
 
-         beforeEach(function(done){
-           //check if there are at least 2 entities to compare
-           expect(allFeeds).toBeDefined();
-           expect(allFeeds.length).toBeGreaterThan(1);
+            //loading first feed and saving its html content into variable 'before'
+            loadFeed(0, function() {
+                before = $('.feed').html();
 
-           //loading first feed and saving its html content into variable 'before'
-           loadFeed(0, function(){
-             before = $('.feed').html();
+                //loading second feed and saving its html content into variable 'after'
+                loadFeed(1, function() {
+                    after = $('.feed').html();
+                    done();
+                });
+            });
+        });
 
-             //loading second feed and saving its html content into variable 'after'
-             loadFeed(1, function(){
-               after = $('.feed').html();
-               done();
-             });
-           });
-         });
-
-         //making sure that variables are not equal as such content is different
-         it('changes content', function(){
-           expect(before).not.toEqual(after);
-         });
+        //making sure that variables before and after are not equal as such content is different
+        it('changes content', function() {
+            expect(before).not.toEqual(after);
+        });
 
     });
 }());
